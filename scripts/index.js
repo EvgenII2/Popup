@@ -47,6 +47,7 @@ const renderPictures = function (list) {
     image.src = cropImage(element.download_url, 5);
     image.alt = element.author;
     image.classList.add("preview");
+    console.log();
     fragment.appendChild(clone);
   });
 
@@ -87,6 +88,55 @@ const onButtonLoadClick = (evt) => {
   }
 };
 
+const onButtonClosePopupClick = function () {
+  togglePopup();
+};
+
+const onImageClick = (evt) => {
+  evt.preventDefault();
+
+  const parentOfTarget = evt.target.closest(".image-card__link");
+  if (parentOfTarget) {
+    getPictureInfo(parentOfTarget.dataset.id);
+  }
+};
+
+const getPictureInfo = (id = 0) => {
+  showLoader();
+  fetch(`https://picsum.photos/id/${id}/info`)
+    .then(function (response) {
+      return response.json();
+    })
+    .then(function (result) {
+      renderPopupPicture(result);
+    });
+};
+
+const renderPopupPicture = (picture) => {
+  const clone = templateImagePopup.content.cloneNode(true);
+  console.log(clone)
+  const img = clone.querySelector(".image-popup__image");
+  const link = clone.querySelector(".image-popup__link");
+  const author = clone.querySelector(".image-popup__author");
+
+  img.src = cropImage(picture.download_url, 2);
+  img.alt = picture.author;
+  author.textContent = picture.author;
+  img.width = picture.width / 10;
+  link.href = picture.download_url;
+
+  popupContainer.innerHTML = "";
+  popupContainer.appendChild(clone);
+  hideLoader();
+  togglePopup();
+};
+
+const togglePopup = () => {
+  popup.classList.toggle("popup_open");
+};
+
 buttonLoad.addEventListener("click", onButtonLoadClick);
+container.addEventListener("click", onImageClick);
+buttonClosePopup.addEventListener("click", onButtonClosePopupClick);
 
 initialState();
